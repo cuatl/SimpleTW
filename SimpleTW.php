@@ -1,4 +1,8 @@
 <?php
+   /*
+   * SimpleTW - clase simple para interactuar con el API de Twitter 1.1 , OAuth 1.0
+   * @ToRo 2017 https://tar.mx/
+   */ 
    class SimpleTW {
       //
       private $consumerKey;         // De la aplicación
@@ -49,8 +53,9 @@
          $this->sign();
          $this->headers();
          //
-         $run = $this->run();
+         //$run = $this->run();
          //
+         /*
          print_r($this->hash);
          print_r($this->base);
          echo "\nkey: ".$this->key."\n";
@@ -58,6 +63,15 @@
          echo "headers: ";
          print_r($this->headers);
          echo "\n";
+         */
+         $tmp = $this->run();
+         parse_str($tmp,$data);
+         //print_r($data);
+         if(isset($data['oauth_callback_confirmed'])) {
+            return "https://api.twitter.com/oauth/authenticate?oauth_token=".$data["oauth_token"];
+         } else {
+            return "No se pudo obtener el URL con esas credenciales\n";
+         }
       }
       private function run() {
          if($this->method == 'POST') {
@@ -65,12 +79,12 @@
          } elseif($this->method == 'GET') {
             curl_setopt($this->ch,CURLOPT_HTTPGET,1); 
          }
-         curl_setopt($this->ch,CURLOPT_HEADER,1); 
+         curl_setopt($this->ch,CURLOPT_HEADER,0); 
          curl_setopt($this->ch,CURLOPT_RETURNTRANSFER,1);
          curl_setopt($this->ch,CURLOPT_HTTPHEADER, $this->headers); 
          curl_setopt($this->ch,CURLOPT_URL, $this->url);
          $tw= curl_exec($this->ch);
-         print_r($tw);
+         return $tw;
       }
       private function headers() {
          $headers = null;
@@ -79,7 +93,7 @@
          $this->headers = ["Authorization: OAuth ".$headers];
       }
       private function sign() {
-         $this->signature = base64_encode(hash_hmac('sha1', $this->base, $this->key, TRUE));
+         $this->signature = urlencode(base64_encode(hash_hmac('sha1', $this->base, $this->key, TRUE)));
          $this->hash['oauth_signature'] = $this->signature;
          ksort($this->hash);
       }
@@ -87,7 +101,6 @@
          $string = null;
          foreach($this->hash AS $k=>$v) $string .= sprintf('%s=%s&',$k,$v);
          $string = substr($string,0,-1);
-         print_r($string." <-- \n\n");
          return sprintf("%s&%s&%s",$this->method,urlencode($this->url), rawurlencode($string));
       }
       private function hash() {
@@ -107,9 +120,4 @@
          return $key;
       }
    }
-   // opcionalmente se puede psar el OAUTH_TOKEN y OAUTH_TOKEN_SECRET generado por el usuario 
-   $config = ["CONSUMER_KEY", "CONSUMER_SECRET"];
-   $SimpleTW    = new SimpleTW($config);
-   $args = new stdclass;
-   $urlGetToken = $SimpleTW->urlGetToken("https://tar.mx/foros/?entrar=tw"); //URL Callback como parámetro
-   print_r($urlGetToken);
+   //EOF
