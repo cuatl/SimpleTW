@@ -9,19 +9,18 @@
       private $consumerSecret;      //
       private $ch;                  // conexión CURL
       private $urladd;              // caso get, parámetros extras
+      private $base;                // TW Base
+      private $key;                 // TW key
+      private $signature;           // TW Signature
+      private $headers;             // TW headers request
+      private $hash;                // Datos a procesar
       //
-      public $oauthToken;           // De el usuario identificado
-      public $oauthTokenSecret;     // 
-      //
-      public $url;                  // URL Twitter (api)
-      public $callback;             // URL callback (nuestro sitio)
-      public $hash;                 // Datos a procesar
-      public $base;                 // TW Base
-      public $key;                  // TW key
-      public $signature;            // TW Signature
-      public $headers;              // TW headers request
-      public $method;               // método a enviar (POST,GET);
-      public $verbose = false;      // CH verbose (curl)
+      public  $oauthToken;          // De el usuario identificado
+      public  $oauthTokenSecret;    // 
+      public  $method;              // método a enviar (POST,GET);
+      public  $url;                 // URL Twitter (api)
+      public  $callback;            // URL callback (nuestro sitio)
+      public  $debug = false;       // modo debug, imprime algunas variables
       /* constructor $config[CONSUMER_KEY, CONSUMER_SECRET, TOKEN, TOKEN_SECRET] {{{ */
       function __construct() {
          $config = func_get_args();
@@ -40,10 +39,6 @@
             $this->hash();
          } else die("Es necesario pasar por un arreglo CONSUMER_KEY y CONSUMER_SECRET de la APP\n");
       } /* }}} */
-      /* destructor {{{ */
-      function __destruct() {
-         if($this->ch) curl_close($this->ch);
-      } /* }}} */
       /* envía las peticiones al twitter api(método, url, [args]) {{{ */
       public function api() {
          $this->method  = func_get_arg(0);
@@ -53,12 +48,8 @@
          if(!empty($this->oauthToken)) $hargs = ["oauth_token"=>$this->oauthToken];
          if(!empty($this->callback)) $hargs = ["oauth_callback" => urlencode($this->callback)];
          if(!empty($args) && $this->method == 'GET') { $hargs = array_merge($hargs,$args); }
-         $this->hash = $this->hash($hargs);  //generamos el hash
-         ksort($this->hash);
-         $this->base = $this->base();       //obtenemos la base
-         $this->key = $this->getKey();
-         $this->sign();
-         $this->headers();
+         //
+         $this->prepare($hargs);
          // parámetros extras a GET
          if(!empty($args) && $this->method == 'GET') { $this->urladd = $args; }
          //
@@ -69,6 +60,11 @@
          echo "\n\nkey:\n"; print_r($this->key); echo "\nheaders:\n"; print_r($this->headers);
          */
          return $da;
+      } /* }}} */
+      /* prepara las cadenas necesarias antes de enviar {{{ */
+      private function prepare($args) {
+         $this->hash($args); ksort($this->hash); 
+         $this->base(); $this->getKey(); $this->sign(); $this->headers();
       } /* }}} */
       /* envía las peticiones por CURL run([args]) {{{ */
       private function run() {
@@ -81,7 +77,7 @@
          } elseif($this->method == 'GET') {
             curl_setopt($this->ch,CURLOPT_HTTPGET,1); 
          }
-         curl_setopt($this->ch,CURLOPT_VERBOSE,(($this->verbose)?1:0)); 
+         curl_setopt($this->ch,CURLOPT_VERBOSE,(($this->debug)?1:0)); 
          curl_setopt($this->ch,CURLOPT_HEADER,0); 
          curl_setopt($this->ch,CURLOPT_RETURNTRANSFER,1);
          curl_setopt($this->ch,CURLOPT_HTTPHEADER, $this->headers); 
@@ -89,18 +85,8 @@
          if(!empty($this->urladd)) $url .= "?".http_build_query($this->urladd);
          curl_setopt($this->ch,CURLOPT_URL, $url);
          $tw = curl_exec($this->ch);
-         if($this->verbose) {
-            echo "<pre>";
-            echo $this->method."\n";
-            printf("URL %s\n",$url);
-            echo "HEADERS:\n";
-            print_r($this->headers);
-            echo "ARGS:\n";
-            print_r($args);
-            echo "RES\n";
-            print_r($tw);
-            echo "\n";
-            echo "</pre>";
+         if($this->debug) {
+            printf("<pre>URL: %s %s\nHeaders: \n",$this->method,$url); print_r($this->headers); echo "ARGS: \n"; print_r($args); echo "RESULTADO: \n"; print_r($tw); echo "\n</pre>\n";
          }
          return $tw;
       } /* }}} */
@@ -122,7 +108,7 @@
          $string = null;
          foreach($this->hash AS $k=>$v) $string .= sprintf('%s=%s&',$k,$v);
          $string = substr($string,0,-1);
-         return sprintf("%s&%s&%s",$this->method,urlencode($this->url), rawurlencode($string));
+         $this->base = sprintf("%s&%s&%s",$this->method,urlencode($this->url), rawurlencode($string));
       } /* }}} */
       /*  genera hash {{{ */
       private function hash() {
@@ -135,12 +121,16 @@
          "oauth_nonce"              => substr(base64_encode(md5(time())),0,32),
          "oauth_version"            => "1.0",
          ];
-         return (!empty($args) ? array_merge($hash, $args[0]) : $hash);
+         $this->hash = (!empty($args) ? array_merge($hash, $args[0]) : $hash);
       } /* }}} */
       /* getkey, genera la llave {{{ */
       private function getKey() {
-         $key = sprintf("%s&%s",rawurlencode($this->consumerSecret),rawurlencode($this->oauthTokenSecret));
-         return $key;
+         $this->key = sprintf("%s&%s",rawurlencode($this->consumerSecret),rawurlencode($this->oauthTokenSecret));
+         //return $key;
+      } /* }}} */
+      /* destructor {{{ */
+      function __destruct() {
+         if($this->ch) curl_close($this->ch);
       } /* }}} */
    }
    //EOF
