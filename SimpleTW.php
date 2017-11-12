@@ -4,13 +4,14 @@
    * @ToRo 2017 https://tar.mx/
    */ 
    class SimpleTW {
-      //
+      // definiciones
       private $consumerKey;         // De la aplicación
       private $consumerSecret;      // De la aplicación
-      private $oauthToken;          // De el usuario
-      private $oauthTokenSecret;    // De el usuario
       private $ch;                  // conexión CURL
-      // definiciones
+      //
+      public $oauthToken;          // De el usuario identificado
+      public $oauthTokenSecret;    // 
+      //
       public $url;                  // URL Twitter (api)
       public $hash;                 // Datos a procesar
       public $callback;             // URL Callback (de tu sitio web)
