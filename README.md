@@ -13,7 +13,7 @@ Enviar un tuit:
    $config["CONSUMER_KEY","CONSUMER_SECRET","OAUTH_TOKEN","OAUTH_TOKEN_SECRET"];
    $SimpleTW = new SimpleTW($config);
    $url      = "https://api.twitter.com/1.1/statuses/update.json";
-   $data     = $SimpleTW->api("POST", "", ["status" => "hola mundo"]); //post al api
+   $data     = $SimpleTW->api("POST", $url, ["status" => "hola mundo"]); //post al api
    $data     = json_decode($data);
    print_r($data);
 ```
