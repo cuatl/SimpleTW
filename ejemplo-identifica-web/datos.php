@@ -18,13 +18,40 @@
       $url      = "https://api.twitter.com/1.1/account/verify_credentials.json";
       // lista de argumentos a enviar (get, o post)
       // en este caso, si tu aplicación tiene permisos de obtener el correo se puede así solicitar
-      // en caso de que no, quitarlo porque dará error.
-      $args = [
-      "include_email" => "true",
-      ];
+      // en caso de que no, dejarlo como $args = []; //array vacío, sin argumentos
+      $args = ["include_email" => "true", "include_entities" => "false", "skip_status" => "true"];
       //
-      $data = $SimpleTW->api($metodo, $url, $args);
-      print_r($data);
+   ?>
+   <p class="lead">Datos obtenidos:</p>
+   <p>
+   Si todo salió bien, abajo tendremos los datos de usuario como nombre, correo, etcétera. 
+   Para el ejemplo mostramos todos, pero almacenaremos unos cuantos en sesión.
+   -- <a href="<?php echo $sitio;?>">continuar en portada</a>
+   </p>
+   <pre>
+      <?php
+         $data = $SimpleTW->api($metodo, $url, $args);
+         if(preg_match("/\.json$/",$url)) {
+            $data = json_decode($data); //convertimos JSON a objeto PHP
+            $tmp = [
+            "ciudad"        => $data->location,
+            "seguidores"    => $data->followers_count,
+            "seguidos"      => $data->friends_count,
+            "cuentacreada"  => $data->created_at,
+            "tuits"         => $data->statuses_count,
+            "imagen"        => $data->profile_image_url_https,
+            "correo"        => $data->email,
+            "nombre"        => $data->name,
+            ];
+            $tw['data'] = $tmp;
+            print_r($data);
+         } else {
+            print_r($data);
+         }
+         echo "</pre>";
+   ?>
+</pre>
+<?php
       return;
    }
    //0. aún no ha obtenido datos.
@@ -54,6 +81,11 @@
       $tw =& $_SESSION['twitter'];     // datos de sesión
       $SimpleTW-&gt;oauthToken       = $tw['oauth_token'];
       $SimpleTW-&gt;oauthTokenSecret = $tw['oauth_token_secret'];
+      $metodo   = "GET";  //metodo a enviar
+      $url      = "https://api.twitter.com/1.1/account/verify_credentials.json";
+      $args = ["include_email" =&gt; "true"];
+      $data = $SimpleTW-&gt;api($metodo, $url, $args);
+      print_r($data);
    </pre>
    <?php
    }

@@ -1,5 +1,6 @@
 <?php
    session_start();
+   setlocale(LC_ALL,'es_MX.UTF-8');
    include_once(__DIR__."/config.php");
    $sitio = "/apps/twitter/";
    if(isset($_GET['salir'])) { session_destroy(); header("Location: ".$sitio); exit();
@@ -31,7 +32,10 @@
                   <li class="nav-item"><a class="nav-link" href="/">tar.mx</a></li>
                </ul>
                <?php
-                  //imagen usuario
+                  //imagen usuario identificado
+                  if(isset($_SESSION['twitter']['data'])) {
+                     printf('<span class="navbar-text float-right">%s <img src="%s" height="30" alt="imagen" /></span>',$_SESSION['twitter']['screen_name'],$_SESSION['twitter']['data']['imagen']);
+                  }
                ?>
             </div>
             </nav>
@@ -40,11 +44,15 @@
          <div class="row">
             <div class="col-sm-8">
                <?php
-                  //aún no estamos identificados con twitter?
                   if(!isset($_SESSION['twitter'])) {
+                     //aún no estamos identificados con twitter?
                      include_once("twflow.php");
-                  } else {
+                  } elseif(!isset($_SESSION['twitter']['data'])) {
+                     //está identificado, pero aún no conocemos sus datos.
                      include_once("datos.php");
+                  } else {
+                     //ya sabemos quien es... :-)
+                     include_once("portada.php");
                   }
                ?>
             </div>

@@ -13,6 +13,11 @@
    if(!isset($_GET['entrar'])) {
       //paso 1
    ?>
+   <p>
+   Ejemplo de la clase <a href="https://github.com/cuatl/SimpleTW">SimpleTW</a> para 
+   identificarse con el servicio de <strong>Twitter</strong>.
+   El código está disponible en github.
+   </p>
    <h1>Paso 1: iniciar el proceso de login</h1>
    <p class="text-center">
    <a href="https://tar.mx/apps/twitter/?entrar=1" class="btn btn-primary btn-lg">Generar token para login</a>
@@ -34,7 +39,7 @@
       //paso 2, obtenemos el url del token con nuestra página donde vamos a continuar le proceso una vez identificado con TW
       $urlGetToken = $SimpleTW->urlGetToken("https://tar.mx/apps/twitter/?entrar=1");
       if(preg_match("/^https:\/\/api\.twitter\.com/",$urlGetToken)) {
-         echo "Ok, continuamos con ".$urlGetToken;
+         //echo "Ok, continuamos con ".$urlGetToken;
       } else die("ERROR: ".$urlGetToken);
    ?>
    <h1>Paso 2: obtenemos URL del servicio</h1>
@@ -42,7 +47,7 @@
    <a href="<?php echo $urlGetToken;?>" class="btn btn-primary btn-lg">Entrar con twitter</a>
    </p>
    <p>
-   Vamos a ir a la siguiente liga:
+   Vamos a ir a la siguiente liga generada por el servicio, 
    <kbd><?php echo $urlGetToken;?></kbd>
    desde la cual Twitter nos pedirá nuestras credenciales para continuar. En el paso
    anterior pusimos la dirección del callback URL (esta página) que es la que va a 
