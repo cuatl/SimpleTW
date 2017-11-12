@@ -22,7 +22,7 @@
       public $headers;              // TW headers request
       public $method;               // método a enviar (POST,GET);
       public $verbose = false;      // CH verbose (curl)
-      /* constructor {{{ */
+      /* constructor $config[CONSUMER_KEY, CONSUMER_SECRET, TOKEN, TOKEN_SECRET] {{{ */
       function __construct() {
          $config = func_get_args();
          if(isset($config[0][0]) && isset($config[0][1])) {
@@ -44,7 +44,7 @@
       function __destruct() {
          if($this->ch) curl_close($this->ch);
       } /* }}} */
-      /* envía las peticiones al api {{{ */
+      /* envía las peticiones al twitter api(método, url, [args]) {{{ */
       public function api() {
          $this->method  = func_get_arg(0);
          $this->url = func_get_arg(1);
@@ -70,7 +70,7 @@
          */
          return $da;
       } /* }}} */
-      /* envía las peticiones por CURL {{{ */
+      /* envía las peticiones por CURL run([args]) {{{ */
       private function run() {
          @$args = func_get_arg(0);
          if($this->method == 'POST') {
