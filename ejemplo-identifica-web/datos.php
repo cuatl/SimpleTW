@@ -26,7 +26,9 @@
    <p>
    Si todo salió bien, abajo tendremos los datos de usuario como nombre, correo, etcétera. 
    Para el ejemplo mostramos todos, pero almacenaremos unos cuantos en sesión.
-   -- <a href="<?php echo $sitio;?>">continuar en portada</a>
+   </p>
+   <p class="text-center">
+   <a class="btn btn-secondary" href="<?php echo $sitio;?>">continuar en portada</a>
    </p>
    <pre>
       <?php
