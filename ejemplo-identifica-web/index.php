@@ -50,6 +50,8 @@
                   } elseif(!isset($_SESSION['twitter']['data'])) {
                      //está identificado, pero aún no conocemos sus datos.
                      include_once("datos.php");
+                  } elseif(isset($_GET['cmd'])) {
+                     include_once("cmd/index.php");
                   } else {
                      //ya sabemos quien es... :-)
                      include_once("portada.php");
@@ -64,10 +66,13 @@
                   <li>Datos del usuario generales</li>
                   <li>Enviar un post de ejemplo :-)</li>
                </ol>
-
-
-
-               Otras aplicaciones
+               <p>
+               <a href="https://github.com/cuatl/SimpleTW">Código en github</a>
+               </p>
+               Otros ejemplos
+               <ul>
+                  <li><a href="<?php echo $sitio;?>?cmd=status">enviar un post</a> desde línea de comandos</li>
+               </ul>
             </div>
          </div>
          <!-- Site footer -->

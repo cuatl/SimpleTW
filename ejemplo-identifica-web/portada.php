@@ -23,7 +23,7 @@
       </p>
       <?php
       } else {
-         echo "<p class=\"text-danger lead\"><strong<Ups, algo debió salir mal</strong></p>";
+         echo "<p class=\"text-danger lead\"><strong>Ups, algo debió salir mal</strong></p>";
       }
    ?>
    <p>Resultado del post:</p>

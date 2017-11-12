@@ -84,7 +84,11 @@
    <pre>
    <?php
       //ahora, verificamos que con el token y verifier, podamos identificar al usuario
-      $res = $SimpleTW->verifica($_GET['oauth_token'],$_GET['oauth_verifier']);
+      $args = ['oauth_verifier'=> $_GET['oauth_verifier']];
+      $SimpleTW->oauthToken = __($_GET['oauth_token']);
+      $url = "https://api.twitter.com/oauth/access_token";
+      $tmp = $SimpleTW->api("POST", $url, $args);
+      parse_str($tmp,$res);
       echo "\n";
       print_r($res);
       //almacenamos los datos de la sesión
