@@ -14,12 +14,14 @@
       public $oauthTokenSecret;     // 
       //
       public $url;                  // URL Twitter (api)
+      public $callback;             // URL callback (nuestro sitio)
       public $hash;                 // Datos a procesar
       public $base;                 // TW Base
       public $key;                  // TW key
       public $signature;            // TW Signature
       public $headers;              // TW headers request
       public $method;               // método a enviar (POST,GET);
+      public $verbose = false;      // CH verbose (curl)
       /* constructor {{{ */
       function __construct() {
          $config = func_get_args();
@@ -42,33 +44,14 @@
       function __destruct() {
          if($this->ch) curl_close($this->ch);
       } /* }}} */
-      /* obtiene el token para identificarse  -- ELIMINAR -- {{{ */
-      public function urlGetToken() {
-         $callback = rawurlencode(func_get_arg(0));
-         $this->method   = "POST";
-         $this->oauthTokenSecret = null;
-         $this->url      = "https://api.twitter.com/oauth/request_token";
-         $this->hash = $this->hash(["oauth_callback"=> $callback]);
-         ksort($this->hash);
-         $this->base = $this->base();
-         $this->key  = $this->getKey();
-         $this->sign();
-         $this->headers();
-         $tmp = $this->run();
-         parse_str($tmp,$data);
-         //print_r($data);
-         if(isset($data['oauth_callback_confirmed'])) {
-            return "https://api.twitter.com/oauth/authenticate?oauth_token=".$data["oauth_token"];
-         } else {
-            return "No se pudo obtener el URL con esas credenciales\n";
-         }
-      } /* }}} */
       /* envía las peticiones al api {{{ */
       public function api() {
          $this->method  = func_get_arg(0);
          $this->url = func_get_arg(1);
          $args = func_get_arg(2);
-         $hargs = ["oauth_token"=>$this->oauthToken];
+         $hargs = [];
+         if(!empty($this->oauthToken)) $hargs = ["oauth_token"=>$this->oauthToken];
+         if(!empty($this->callback)) $hargs = ["oauth_callback" => urlencode($this->callback)];
          if(!empty($args) && $this->method == 'GET') { $hargs = array_merge($hargs,$args); }
          $this->hash = $this->hash($hargs);  //generamos el hash
          ksort($this->hash);
@@ -98,7 +81,7 @@
          } elseif($this->method == 'GET') {
             curl_setopt($this->ch,CURLOPT_HTTPGET,1); 
          }
-         curl_setopt($this->ch,CURLOPT_VERBOSE,0); 
+         curl_setopt($this->ch,CURLOPT_VERBOSE,(($this->verbose)?1:0)); 
          curl_setopt($this->ch,CURLOPT_HEADER,0); 
          curl_setopt($this->ch,CURLOPT_RETURNTRANSFER,1);
          curl_setopt($this->ch,CURLOPT_HTTPHEADER, $this->headers); 
@@ -106,6 +89,19 @@
          if(!empty($this->urladd)) $url .= "?".http_build_query($this->urladd);
          curl_setopt($this->ch,CURLOPT_URL, $url);
          $tw = curl_exec($this->ch);
+         if($this->verbose) {
+            echo "<pre>";
+            echo $this->method."\n";
+            printf("URL %s\n",$url);
+            echo "HEADERS:\n";
+            print_r($this->headers);
+            echo "ARGS:\n";
+            print_r($args);
+            echo "RES\n";
+            print_r($tw);
+            echo "\n";
+            echo "</pre>";
+         }
          return $tw;
       } /* }}} */
       /* headers, genera las cabeceras HTTP {{{ */
