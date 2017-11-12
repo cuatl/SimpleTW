@@ -74,35 +74,68 @@
          }
       }
       private function run() {
+         @$args = func_get_arg(0);
          if($this->method == 'POST') {
             curl_setopt($this->ch,CURLOPT_POST,1); 
+            if(!empty($args)) {
+               curl_setopt($this->ch,CURLOPT_POSTFIELDS,$args);
+            }
          } elseif($this->method == 'GET') {
             curl_setopt($this->ch,CURLOPT_HTTPGET,1); 
          }
+         curl_setopt($this->ch,CURLOPT_VERBOSE,1); 
          curl_setopt($this->ch,CURLOPT_HEADER,0); 
          curl_setopt($this->ch,CURLOPT_RETURNTRANSFER,1);
          curl_setopt($this->ch,CURLOPT_HTTPHEADER, $this->headers); 
          curl_setopt($this->ch,CURLOPT_URL, $this->url);
-         $tw= curl_exec($this->ch);
+         $tw = curl_exec($this->ch);
          return $tw;
       }
+      public function verifica() {
+         @$token     = func_get_arg(0);
+         @$verifier  = func_get_arg(1);
+         if(empty($token) OR empty($verifier)) die("No se puede continuar sin el token y el verificador del servicio");
+         // generamos el hash
+         $this->url = "https://api.twitter.com/oauth/access_token";
+         $this->hash = $this->hash(["oauth_token"=> $token]);
+         ksort($this->hash);
+         $this->base = $this->base();
+         $this->oauthTokenSecret = $token;
+         $this->key  = $this->getKey();
+         $this->sign();
+         $this->headers();
+         $post = ['oauth_verifier'=>$verifier];
+         $this->method="POST";
+         $tmp = $this->run($post);
+         parse_str($tmp, $res);
+         return $res;
+         /*
+         echo "<pre>";
+         print_r($this->hash); echo "<p>key: "; print_r($this->key); print_r($this->headers);
+         echo "</pre>";
+         */
+      }
+      /* headers, genera las cabeceras HTTP {{{ */
       private function headers() {
          $headers = null;
          foreach($this->hash AS $k=>$v) $headers .= sprintf('%s="%s", ',$k,$v);
          $headers = substr($headers,0,-2);
          $this->headers = ["Authorization: OAuth ".$headers];
-      }
+      } /* }}} */
+      /* sign, genera firma {{{ */
       private function sign() {
          $this->signature = urlencode(base64_encode(hash_hmac('sha1', $this->base, $this->key, TRUE)));
          $this->hash['oauth_signature'] = $this->signature;
          ksort($this->hash);
-      }
+      } /* }}} */
+      /* base, genera base {{{ */
       private function base() {
          $string = null;
          foreach($this->hash AS $k=>$v) $string .= sprintf('%s=%s&',$k,$v);
          $string = substr($string,0,-1);
          return sprintf("%s&%s&%s",$this->method,urlencode($this->url), rawurlencode($string));
-      }
+      } /* }}} */
+      /*  genera hash {{{ */
       private function hash() {
          try { $args = func_get_args(0); }
          catch (Exception $e) { $args = []; }
@@ -114,10 +147,11 @@
          "oauth_version"            => "1.0",
          ];
          return (!empty($args) ? array_merge($hash, $args[0]) : $hash);
-      }
-      private function getkey() {
+      } /* }}} */
+      /* getkey, genera la llave {{{ */
+      private function getKey() {
          $key = sprintf("%s&%s",rawurlencode($this->consumerSecret),rawurlencode($this->oauthTokenSecret));
          return $key;
-      }
+      } /* }}} */
    }
    //EOF
