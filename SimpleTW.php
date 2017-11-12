@@ -67,9 +67,9 @@
       public function api() {
          $this->method  = func_get_arg(0);
          $this->url = func_get_arg(1);
-         $hargs = $args = func_get_arg(2);
-         if(!empty($args)) {
-            $hargs = ["oauth_token"=>$this->oauthToken];
+         $args = func_get_arg(2);
+         $hargs = ["oauth_token"=>$this->oauthToken];
+         if(!empty($args) && $this->method == 'GET') {
             $hargs = array_merge($hargs,$args);
          }
          $this->hash = $this->hash($hargs);  //generamos el hash
@@ -83,16 +83,13 @@
             $this->urladd = $args;
          }
          //
-         $da = $this->run();
-         return $da;
+         $post = ($this->method == 'POST' && !empty($args)) ? $args : [];
+         $da = $this->run($post);
          /*
-         print_r($da);
-         print_r($this->hash);
-         echo "base:\n"; print_r($this->base);
-         echo "\n\nkey:\n"; print_r($this->key);
-         echo "\nheaders:\n"; print_r($this->headers);
-         echo "\n--\n";
+         print_r($da); print_r($this->hash); echo "base:\n"; print_r($this->base); 
+         echo "\n\nkey:\n"; print_r($this->key); echo "\nheaders:\n"; print_r($this->headers);
          */
+         return $da;
       }
       private function run() {
          @$args = func_get_arg(0);
