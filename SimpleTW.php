@@ -8,6 +8,7 @@
       private $consumerKey;         // De la aplicación
       private $consumerSecret;      // De la aplicación
       private $ch;                  // conexión CURL
+      private $urladd;              // caso get, parámetros extras
       //
       public $oauthToken;          // De el usuario identificado
       public $oauthTokenSecret;    // 
@@ -42,6 +43,7 @@
       function __destruct() {
          if($this->ch) curl_close($this->ch);
       } /* }}} */
+      /* obtiene el token para identificarse {{{ */
       public function urlGetToken() {
          $this->callback = rawurlencode(func_get_arg(0));
          $this->method   = "POST";
@@ -53,18 +55,6 @@
          $this->key  = $this->getKey();
          $this->sign();
          $this->headers();
-         //
-         //$run = $this->run();
-         //
-         /*
-         print_r($this->hash);
-         print_r($this->base);
-         echo "\nkey: ".$this->key."\n";
-         echo "signature: ".$this->signature."\n";
-         echo "headers: ";
-         print_r($this->headers);
-         echo "\n";
-         */
          $tmp = $this->run();
          parse_str($tmp,$data);
          //print_r($data);
@@ -73,6 +63,36 @@
          } else {
             return "No se pudo obtener el URL con esas credenciales\n";
          }
+      } /* }}} */
+      public function api() {
+         $this->method  = func_get_arg(0);
+         $this->url = func_get_arg(1);
+         $hargs = $args = func_get_arg(2);
+         if(!empty($args)) {
+            $hargs = ["oauth_token"=>$this->oauthToken];
+            $hargs = array_merge($hargs,$args);
+         }
+         $this->hash = $this->hash($hargs);  //generamos el hash
+         ksort($this->hash);
+         $this->base = $this->base();       //obtenemos la base
+         $this->key = $this->getKey();
+         $this->sign();
+         $this->headers();
+         // parámetros extras a GET
+         if(!empty($args) && $this->method == 'GET') {
+            $this->urladd = $args;
+         }
+         //
+         $da = $this->run();
+         return $da;
+         /*
+         print_r($da);
+         print_r($this->hash);
+         echo "base:\n"; print_r($this->base);
+         echo "\n\nkey:\n"; print_r($this->key);
+         echo "\nheaders:\n"; print_r($this->headers);
+         echo "\n--\n";
+         */
       }
       private function run() {
          @$args = func_get_arg(0);
@@ -84,14 +104,17 @@
          } elseif($this->method == 'GET') {
             curl_setopt($this->ch,CURLOPT_HTTPGET,1); 
          }
-         curl_setopt($this->ch,CURLOPT_VERBOSE,1); 
+         curl_setopt($this->ch,CURLOPT_VERBOSE,0); 
          curl_setopt($this->ch,CURLOPT_HEADER,0); 
          curl_setopt($this->ch,CURLOPT_RETURNTRANSFER,1);
          curl_setopt($this->ch,CURLOPT_HTTPHEADER, $this->headers); 
-         curl_setopt($this->ch,CURLOPT_URL, $this->url);
+         $url = $this->url;
+         if(!empty($this->urladd)) $url .= "?".http_build_query($this->urladd);
+         curl_setopt($this->ch,CURLOPT_URL, $url);
          $tw = curl_exec($this->ch);
          return $tw;
       }
+      /* verifica si una cuenta está identificada {{{ */
       public function verifica() {
          @$token     = func_get_arg(0);
          @$verifier  = func_get_arg(1);
@@ -110,12 +133,7 @@
          $tmp = $this->run($post);
          parse_str($tmp, $res);
          return $res;
-         /*
-         echo "<pre>";
-         print_r($this->hash); echo "<p>key: "; print_r($this->key); print_r($this->headers);
-         echo "</pre>";
-         */
-      }
+      } /* }}} */
       /* headers, genera las cabeceras HTTP {{{ */
       private function headers() {
          $headers = null;
