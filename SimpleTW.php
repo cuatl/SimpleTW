@@ -111,26 +111,6 @@
          $tw = curl_exec($this->ch);
          return $tw;
       }
-      /* verifica si una cuenta está identificada {{{ */
-      public function verifica() {
-         @$token     = func_get_arg(0);
-         @$verifier  = func_get_arg(1);
-         if(empty($token) OR empty($verifier)) die("No se puede continuar sin el token y el verificador del servicio");
-         // generamos el hash
-         $this->url = "https://api.twitter.com/oauth/access_token";
-         $this->hash = $this->hash(["oauth_token"=> $token]);
-         ksort($this->hash);
-         $this->base = $this->base();
-         $this->oauthTokenSecret = $token;
-         $this->key  = $this->getKey();
-         $this->sign();
-         $this->headers();
-         $post = ['oauth_verifier'=>$verifier];
-         $this->method="POST";
-         $tmp = $this->run($post);
-         parse_str($tmp, $res);
-         return $res;
-      } /* }}} */
       /* headers, genera las cabeceras HTTP {{{ */
       private function headers() {
          $headers = null;
