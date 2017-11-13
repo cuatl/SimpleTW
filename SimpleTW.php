@@ -86,7 +86,7 @@
          curl_setopt($this->ch,CURLOPT_URL, $url);
          $tw = curl_exec($this->ch);
          if($this->debug) {
-            printf("<pre>URL: %s %s\nHeaders: \n",$this->method,$url); print_r($this->headers); echo "ARGS: \n"; print_r($args); echo "RESULTADO: \n"; print_r($tw); echo "\n</pre>\n";
+            printf("<pre>URL: %s %s\nHeaders: \n",$this->method,$url); print_r($this->headers); echo "ARGS: \n"; print_r($args); echo "hash:\n";print_r($this->hash);echo "RESULTADO: \n"; print_r($tw); echo "\n</pre>\n";
          }
          return $tw;
       } /* }}} */
