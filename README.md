@@ -31,4 +31,6 @@ Obtener el token para identificarse (login con Twitter)
    // con $urltoken entonces nos identificamos con la cuenta de twitter para obtnener el token y token_secret
 ```
 
-Esta clase funciona con PHP 5.5 (probablemente con anteriores teniendo CURL y cambiando [] por Array() donde se use) y con el API de Twitter 1.1 y OAuth 1.0. Soporta GET y POST.
+Esta clase funciona con PHP 5.4 (probablemente con anteriores teniendo CURL y cambiando [] por Array() donde se use) y con el API de Twitter 1.1 y OAuth 1.0. Soporta GET y POST.
+
+v1.0

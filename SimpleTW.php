@@ -14,6 +14,7 @@
       private $signature;           // TW Signature
       private $headers;             // TW headers request
       private $hash;                // Datos a procesar
+      private $version = "1.0";
       //
       public  $oauthToken;          // De el usuario identificado
       public  $oauthTokenSecret;    // 
@@ -81,6 +82,8 @@
          curl_setopt($this->ch,CURLOPT_HEADER,0); 
          curl_setopt($this->ch,CURLOPT_RETURNTRANSFER,1);
          curl_setopt($this->ch,CURLOPT_HTTPHEADER, $this->headers); 
+         curl_setopt($this->ch,CURLOPT_USERAGENT,'SimpleTW '.$this->version.' https://tar.mx/apps/twitter/');
+
          $url = $this->url;
          if(!empty($this->urladd)) $url .= "?".http_build_query($this->urladd);
          curl_setopt($this->ch,CURLOPT_URL, $url);
