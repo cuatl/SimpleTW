@@ -37,7 +37,7 @@
             } catch(Exception $e) {
                die("Es necesaria la extensión CURL instalada.\n");
             }
-            $this->hash();
+            //$this->hash();
          } else die("Es necesario pasar por un arreglo CONSUMER_KEY y CONSUMER_SECRET de la APP\n");
       } /* }}} */
       /* envía las peticiones al twitter api(método, url, [args]) {{{ */
